@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/x-icon" href="assets/fav.ico">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CELLULAR AUTOMATA</title>
+
+  <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+  </head>
+
+  <body>
+    <div id="icon-container" style="filter: invert(0%);">
+      <a href="index.html"><img src="assets/home.svg" id="home-icon" alt="Home" style="filter: invert(0%);"></a>
+    </div>
+    <script>// global Vars
+
+      let amplitude = -10.0; 
+      
+      // font
+      let fontA;
+      
+      
+      //gridVars
+      
+      let grid;
+      let cols;
+      let rows;
+      let resolution = 60;
+      
+      // reset logic vars
+      
+      let isPlaying = true; // Start the game immediately
+      let hasBeenRestarted = false; // Track whether the game has been restarted
+      let notes = [
+        "A1", "C2", "D2", "E2", "G2", "A2",
+        "C3", "D4", "E4", "G4",
+        
+        "A2", "C3", "D3", "E3", "G3", "A3",
+        "C4", "D4", "E4", "G4", "A4",
+        "C5", "D5", "E5", "G5", "A5"
+      ];
+      
+      
+      //keep track of notes
+      
+            // Oscillator pool
+            let oscillatorPool = [];
+      const poolSize = 10; // Number of oscillators in the pool
+
+
+      //insert brautigan poem
+      
+      let poem = [
+        "I", "like", "to", "think", "and", "sooner", "the", "better!",
+        "of", "a", "cybernetic", "meadow", "where", "mammals", "and", "computers",
+        "live", "together", "in", "mutually", "programming", "harmony",
+        "like", "pure", "water", "touching", "clear", "sky", "I", "like", "to",
+         "think", "right", "now", "please!", "of", "a", "cybernetic", "forest", "filled", 
+         "with", "pines", "and", "electronics", "where", "deer", "stroll", "peacefully", "past", "computers", 
+         "as", "if", "they", "were", "flowers", "with", "spinning", "blossoms", "I", "like", "to", "think", "it", 
+         "has", "to", "be", "of", "a", "cybernetic", "ecology", "where", "we", "are", "all", "free", "of", "our", 
+         "labors", "and", "joined", "back", "to", "nature", "returned", "to", "our", "mammal", "brothers", "and", 
+         "sisters", "and", "all", "watched", "over", "by", "machines", "of", "loving", "grace"
+      ];
+      
+      //sound vars
+      
+      let synth;
+      let reverb;
+      
+      //preload font
+      
+      function preload() {
+        fontA = loadFont('assets/times.otf');
+      };
+      
+      
+      function setup() {
+        createCanvas(windowWidth, windowHeight); // Use the entire viewing window
+        cols = floor(width / resolution);
+        rows = floor(height / resolution);
+        grid = createRandomGrid(cols, rows);
+        frameRate(6);
+      
+        // Initialize the synth
+        synth = new p5.Oscillator();
+        synth.setType('square');
+        synth.amp(0); // Start with zero amplitude
+        synth.start();
+      
+        // Initialize reverb
+        reverb = new p5.Reverb();
+        reverb.process(synth); // Adjust reverb settings
+
+         // Initialize the oscillator pool
+  for (let i = 0; i < poolSize; i++) {
+    let osc = new p5.Oscillator();
+    osc.setType('sine'); // or 'square', 'triangle', 'sawtooth'
+    osc.amp(0); // Start with zero amplitude
+    osc.start();
+    oscillatorPool.push(osc);
+  }
+      }
+      
+      function draw() {
+        background(255);
+        drawGrid();
+        if (isPlaying) {
+          generate();
+        } else {
+          // Check if the number of live cells is less than 5
+          let liveCellCount = countLiveCells();
+          console.log("Live Cell Count: " + liveCellCount); // Log the live cell count
+      
+          if (liveCellCount < 15) {
+            if (!hasBeenRestarted) {
+              restartGame();
+              hasBeenRestarted = true;
+            }
+          } else {
+            hasBeenRestarted = false; // Reset the restart flag
+          }
+        }
+      
+        synth.amp(constrain(amplitude, 0, 0.5)); // Constrain the amplitude
+      };
+            function playNoteFromPool(note) {
+        let osc = getOscillatorFromPool();
+        if (osc) {
+          osc.freq(midiToFreq(NoteToMidi(note)));
+          osc.amp(0.5, 0.05);
+          osc.amp(0, 0.45);
+          setTimeout(() => osc.amp(0), 500); // Ensures the oscillator is silent after half a second
+        }
+      }
+
+      function getOscillatorFromPool() {
+        for (let osc of oscillatorPool) {
+          if (osc.amp().value === 0) {
+            return osc;
+          }
+        }
+        return null;
+      }
+
+      function createRandomGrid(cols, rows) {
+        let grid = new Array(cols);
+        for (let i = 0; i < cols; i++) {
+          grid[i] = new Array(rows);
+          for (let j = 0; j < rows; j++) {
+            grid[i][j] = random() > 0.5 ? 1 : 0;
+          }
+        }
+        return grid;
+      }
+      
+      function drawGrid() {
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            let x = i * resolution;
+            let y = j * resolution;
+            if (grid[i][j] == 1) {
+              let index = floor(map(i * rows + j, 0, cols * rows, 0, poem.length));
+              let textToDisplay = poem[index];
+              fill(0);
+              stroke(200);
+              textSize(13);
+              textFont(fontA);
+              textAlign(CENTER, CENTER);
+              text(textToDisplay, x + resolution / 2, y + resolution / 2);
+              // Play note from pool
+              let noteIndex = floor(map(i * rows + j, 0, cols * rows, 0, notes.length));
+              playNoteFromPool(notes[noteIndex]);
+            }
+          }
+        }
+      }
+      
+      function playNote(x, y) {
+        let index = floor(map(x * rows + y, 0, cols * rows, 0, notes.length));
+        let note = notes[index];
+        let synth = new p5.Oscillator();
+        synth.setType('sine');
+        synth.freq(midiToFreq(NoteToMidi(note)));
+        synth.amp(0.001);
+        synth.start();
+        synth.amp(0, 0.5);
+        synth.stop(1.5);
+      }
+      
+      function generate() {
+        let nextGrid = new Array(cols);
+        for (let i = 0; i < cols; i++) {
+          nextGrid[i] = new Array(rows);
+          for (let j = 0; j < rows; j++) {
+            let state = grid[i][j];
+            let neighbors = countNeighbors(grid, i, j);
+      
+            if (state == 0 && neighbors == 3) {
+              nextGrid[i][j] = 1;
+            } else if (state == 1 && (neighbors < 2 || neighbors > 3)) {
+              nextGrid[i][j] = 0;
+            } else {
+              nextGrid[i][j] = state;
+            }
+          }
+        }
+        grid = nextGrid;
+      }
+      
+      function countNeighbors(grid, x, y) {
+        let sum = 0;
+        for (let i = -1; i <= 1; i++) {
+          for (let j = -1; j <= 1; j++) {
+            let col = (x + i + cols) % cols;
+            let row = (y + j + rows) % rows;
+            sum += grid[col][row];
+          }
+        }
+        sum -= grid[x][y];
+        return sum;
+      }
+      
+      function countLiveCells() {
+        let liveCount = 0;
+        for (let i = 0; i < cols; i++) {
+          for (let j = 0; j < rows; j++) {
+            if (grid[i][j] === 1) {
+              liveCount++;
+            }
+          }
+        }
+        return liveCount;
+      }
+      
+      function restartGame() {
+        // Keep generating a new random grid until it has at least 5 live cells
+        do {
+          grid = createRandomGrid(cols, rows);
+        } while (countLiveCells() < 15);
+      }
+      
+      
+      function NoteToMidi(note) {
+        let noteToMidiDict = {
+          "C": 0,
+          "C#": 1,
+          "D": 2,
+          "D#": 3,
+          "E": 4,
+          "F": 5,
+          "F#": 6,
+          "G": 7,
+          "G#": 8,
+          "A": 9,
+          "A#": 10,
+          "B": 11
+        };
+        let noteName = note.slice(0, -1);
+        let octave = int(note.slice(-1));
+        return noteToMidiDict[noteName] + 12 * (octave + 2);
+      }
+      
+      function mouseClicked() {
+        isPlaying = !isPlaying;
+        
+        if (isPlaying) {
+          // If the sketch is playing, start or restart the sound
+          synth.start();
+        } else {
+          // If the sketch is paused, stop the sound
+          synth.amp(0, 0.0);
+          synth.stop(0.0); // Adjust the fade-out time as needed
+        }
+      }
+      
+      
+      //restart logic
+      
+      function keyPressed() {
+        if (key === 'R' || key === 'r') {
+          restartGame();
+          isPlaying = true; // Start the game
+        }
+      }
+      
+      //resize logic
+      
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+      }</script>
+  
+  </body>
+</html>

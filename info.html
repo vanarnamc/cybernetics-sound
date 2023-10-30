@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="assets/fav.ico">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Info</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: ABC Monument Grotesk Unlicensed Trial;
+      padding: 0px;
+      font-size: 31px;
+      line-height: 40px;
+    }
+
+    body,
+    canvas {
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="9" fill="black"/></svg>') 10 10, auto;
+    }
+
+    body.clicked,
+    canvas.clicked {
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="9" fill="blue"/></svg>') 10 10, auto;
+    }
+
+    p span {
+      position: relative;
+      display: inline-block;
+    }
+
+    .word {
+      white-space: nowrap;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    .paragraph {
+      margin-bottom: 2px;
+    }
+
+    #targetParagraph {
+      text-indent: 0;
+      margin-bottom: 100px;
+
+    }
+
+    p {
+      margin-bottom: -20px;
+      /* Adjust the margin as needed to control the line height */
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/tone@14.8.30/build/Tone.js"></script>
+</head>
+
+<body>
+  <div id="contentContainer">
+    <p class="targetParagraph">
+      ALL WATCHED OVER BY MACHINES OF LOVING GRACE</p>
+    <p class="targetParagraph">The following text explores the works and driving philosophies of the artists Luigi
+      Russolo and Roland Kayn. At a foundational level, both Kayn and Russolo are focused on a technological shift in
+      society, and the influence this will have on music - both in its place in culture as well as its production.
+      Russolo reacted to the hyper industrial world and focused on manufacturing and machines, while Kayn was influenced
+      by Cybernetics, a theory which was prominent in the 20th century, thanks to the ongoing advancement in computers.
+      Some of the key differences in their aesthetic approach with the mimicry Russolo advocated for, in creating
+      machines that resemble the industrial revolution, and the ongoing wars of his time, while Kayn, on the other hand
+      had more of a focus on harnessing the inherent unpredictability of electronic feedback systems to generate
+      soundscapes. His approach was internal, using technology not as a mirror to the world but as a self-contained,
+      self-generating system. </p>
+    <p class="targetParagraph">Russolo's noises, no matter how revolutionary, were still rooted in human composition;
+      they were crafted, orchestrated sounds. Kayn's cybernetic music, conversely, emerged from setting up conditions
+      and letting electronic systems interact, often producing compositions even he couldn't predict. It's the
+      difference between controlled chaos and letting chaos guide creation.</p>
+    <p class="targetParagraph">In Kayn's philosophy, there is an evident idealism that perceives nature as an
+      omnipresent and unstable force, echoing sentiments presented in Richard Brautigan's poem "All Watched Over by
+      Machines of Loving Grace." This poem imagines a world where humans and nature coexist harmoniously, assisted by
+      technology, encapsulating the utopian desire to see nature as an ever-present, nurturing entity.</p>
+    <p class="targetParagraph">At its peak this utopian optimism ultimately did not produce stable and harmonious
+      communities and networks, envisioned by Brautigan’s poem. The self organized world of cybernetic theoreticians
+      ultimately failed due to the fallacy that these systems resemble the order and stability of nature, but in reality
+      - nature is not stable, it is ever evolving and erratic.</p>
+    <p class="targetParagraph">Unlike Russolo’s art of noises, which seeks to disrupt, and reflect the new machine
+      driven world of his era, Kayn’s work seeks this equilibrium and stability. However, the sonic end result of Kayn’s
+      compositional systems is entropic, random, and confused - much like Russolo’s arrangements. Despite the difference
+      in technology, philosophy and time, the resulting works of these two distinct composers remain firmly rooted in
+      dialogue.</p>
+    <p class="targetParagraph">For this project, we decided to use Kayn’s ideas in sound and cybernetics to create a platform of web based synthesizers using these theories. Each synth is structured in a set of unique, and specific rules that are related to the ideas in cybernetics, and systems. Some of the systems include the laws of physics, cellular automata, or flocking behaviors. The central idea of this project is to explore language, sound, and systems theory in new ways.</p>
+  </div>
+  <div id="icon-container" style="filter: invert(0%);">
+    <a href="index.html"><img src="assets/home.svg" id="home-icon" alt="Home" style="filter: invert(0%);"></a>
+  </div>
+  <!-- <span id="audioPrompt">Click to Read Text</span> -->
+  <script src="https://cdn.rawgit.com/schteppe/poly-decomp.js/master/build/decomp.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.14.2/matter.min.js"></script>
+  <script>
+    // document.getElementById('audioPrompt').addEventListener('click', function() {
+    //   // Start or resume the AudioContext
+    //   Tone.context.resume().then(() => {
+    //     // Show the content and hide the prompt
+    //     document.getElementById('contentContainer').style.display = 'block';
+    //     document.getElementById('audioPrompt').style.display = 'none';
+    //   });
+    // });
+
+    const paragraphs = document.querySelectorAll('#contentContainer .paragraph');
+
+    // Split the paragraph into lines, then words, and then each word into letters
+    paragraphs.forEach(paragraph => {
+      const lines = paragraph.innerHTML.split('<br>');
+      paragraph.innerHTML = lines
+        .map(line => {
+          const words = line.split(" ");
+          return words
+            .map(word => `<span class="word">${[...word].map(letter => `<span>${letter}</span>`).join("")}</span>`)
+            .join(" ");
+        })
+        .join("<br>");
+    });
+
+    const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint, Events } = Matter;
+
+    const engine = Engine.create();
+    engine.world.gravity.y = 1 / 2;
+
+    const render = Render.create({
+      element: document.body,
+      engine: engine,
+      options: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        wireframes: false,
+        background: "transparent",
+      },
+    });
+
+    Engine.run(engine);
+    Render.run(render);
+
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+      mouse: mouse,
+      constraint: {
+        render: { visible: false },
+      },
+    });
+
+    render.mouse = mouse;
+    World.add(engine.world, mouseConstraint);
+
+    const bodiesMap = new Map();
+
+    document.querySelectorAll('.targetParagraph').forEach(paragraph => {
+      paragraph.innerHTML = paragraph.innerText
+        .split(' ')
+        .map(word => `<span class="word">${[...word].map(letter => `<span>${letter}</span>`).join('')}</span>`)
+        .join(' ');
+
+
+      paragraph.addEventListener('mouseover', function (event) {
+        if (event.target.tagName === 'SPAN' && !event.target.classList.contains('word')) {
+          event.target.style.visibility = 'hidden';
+
+          const rect = event.target.getBoundingClientRect();
+          const computedStyle = window.getComputedStyle(event.target);
+          const fontSize = parseFloat(computedStyle.fontSize);
+          const fontFamily = computedStyle.fontFamily;
+
+          const body = Bodies.rectangle(rect.left + rect.width / 2, rect.top + rect.height / 2, rect.width, fontSize, {
+            restitution: 1.5,
+            render: {
+              fillStyle: 'transparent',
+              lineWidth: 0
+            }
+          });
+
+          body.fontDetails = {
+            size: fontSize,
+            family: fontFamily
+          };
+
+          bodiesMap.set(body, event.target.textContent);
+          World.add(engine.world, body);
+        }
+      });
+    });
+
+    const ground = Bodies.rectangle(window.innerWidth / 2, window.innerHeight, window.innerWidth, 10, {
+      isStatic: true,
+      render: {
+        fillStyle: 'black'
+      }
+    });
+    World.add(engine.world, ground);
+
+    const leftWall = Bodies.rectangle(-10, window.innerHeight / 2, 20, window.innerHeight, {
+      isStatic: true,
+      render: {
+        visible: false
+      }
+    });
+    World.add(engine.world, leftWall);
+
+    const rightWall = Bodies.rectangle(window.innerWidth + 10, window.innerHeight / 2, 20, window.innerHeight, {
+      isStatic: true,
+      render: {
+        visible: false
+      }
+    });
+    World.add(engine.world, rightWall);
+
+    Matter.Events.on(render, 'afterRender', function () {
+      const context = render.context;
+      bodiesMap.forEach((letter, body) => {
+        const position = body.position;
+        const angle = body.angle;
+
+        context.save();
+        context.translate(position.x, position.y);
+        context.rotate(angle);
+
+        context.font = `${body.fontDetails.size}px ${body.fontDetails.family}`;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillStyle = "black";
+        context.fillText(letter, 0, 0);
+
+        context.restore();
+      });
+    });
+
+    function resetTextAndBodies() {
+      document.body.classList.remove("clicked");
+
+      bodiesMap.forEach((textContent, body) => {
+        World.remove(engine.world, body);
+        // Find the DOM element that contains the text content
+        document.querySelectorAll('.targetParagraph span').forEach(span => {
+          if (span.textContent === textContent) {
+            span.style.visibility = 'visible';
+          }
+        });
+      });
+
+      bodiesMap.clear();
+    }
+
+    document.body.addEventListener('click', function () {
+      document.body.classList.add("clicked");
+      render.canvas.classList.add("clicked");
+
+      setTimeout(() => {
+        resetTextAndBodies();
+      }, 1000);
+    });
+
+    const filter = new Tone.Filter({
+      type: 'lowpass',
+      frequency: 1500,
+      rolloff: -12
+    }).toDestination();
+
+    const monoSynth = new Tone.MonoSynth({
+      oscillator: {
+        type: 'sawtooth'
+      },
+      envelope: {
+        attack: 0.1,
+        decay: 0.2,
+        sustain: 0.5,
+        release: 1
+      }
+    }).connect(filter);
+
+    const metalSynth = new Tone.MetalSynth({
+      frequency: 200,
+      envelope: {
+        attack: 0.001,
+        decay: 0.01,
+        release: 0.2
+      },
+      harmonicity: 5.1,
+      modulationIndex: 60,
+      resonance: 4000,
+      octaves: 1.5
+    }).connect(filter);
+
+    // Random Modulation Index function
+    function getRandomModulationIndex(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const canvas = document.querySelector('canvas');
+
+    window.addEventListener('scroll', function () {
+      canvas.style.top = window.scrollY + 'px';
+    });
+
+    // Add the reverb here
+    const reverb = new Tone.Reverb({
+      decay: 1.5,
+      wet: 1
+    }).toDestination();
+    reverb.generate();
+
+    monoSynth.connect(filter).connect(reverb);
+    metalSynth.connect(filter).connect(reverb);
+    const scale = ["A1", "C2", "D2", "E2", "G2", "A2"]; // Pentatonic A minor scale
+    let lastNotePlayedTime = 0;
+
+    function playRandomNote() {
+      const currentTime = Tone.now();
+      const debounceTime = 0.05; // in seconds, you can adjust this value
+
+      if (currentTime - lastNotePlayedTime > debounceTime) {
+        const randomNote = scale[Math.floor(Math.random() * scale.length)];
+        monoSynth.triggerAttackRelease(randomNote, "32n");
+        lastNotePlayedTime = currentTime;
+      }
+    }
+    let lastMetalNoteTime = 0; // Keep track of the last time a note was played
+const metalDebounceTime = 0.01; // 100 milliseconds between notes
+
+function playMetalSynthNote() {
+  const currentTime = Tone.now();
+  if (currentTime - lastMetalNoteTime > metalDebounceTime) {
+    // Safe to play the note
+    metalSynth.triggerAttackRelease("16n", currentTime);
+    lastMetalNoteTime = currentTime; // Update the last note time
+  }
+}
+Matter.Events.on(engine, 'collisionStart', function(event) {
+  event.pairs.forEach(pair => {
+    if (pair.bodyA === ground || pair.bodyB === ground) {
+      playRandomNote();
+    } else if (pair.bodyA === leftWall || pair.bodyB === leftWall || pair.bodyA === rightWall || pair.bodyB === rightWall) {
+      metalSynth.modulationIndex.value = getRandomModulationIndex(10, 50); // Adjust modulationIndex for metalSynth
+      playMetalSynthNote(); // Use the debounced function here
+    }
+  });
+});
+  </script>
+</body>
+
+</html>

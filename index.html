@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="icon" type="image/x-icon" href="assets/fav.ico">
+
+    <title>ALL WATCHED OVER BY MACHINES OF LOVING GRACE</title>
+    <style>
+      .container {
+        display: grid;
+        grid-template-rows: 1fr auto;
+        grid-template-columns: 1fr auto;
+        align-items: start; /* Aligns all grid items to the start, sharing the same baseline */
+
+        height: 95vh;
+        padding: 20px; /* Optional: Adds some space from the edges */
+      }
+
+      .main-content {
+        grid-row: 2; /* Positions the main content at the second row */
+        grid-column: 1; /* Positions the main content at the first column */
+        align-self: end; /* Aligns the content to the bottom of the grid area */
+      }
+      h1 {
+        color: #000;
+        font-family: ABC Monument Grotesk Unlicensed Trial;
+        font-size: 59px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 56px; /* 94.915% */
+        padding-bottom: 10px; /* Adjust the space between the title and subtitle */
+      }
+      .text-box h1 {
+        margin: 0; /* Removes default margin */
+      }
+      .text-box h1,
+      .text-box p {
+        text-align: left;
+        /* Apply other styles such as font, color, etc. */
+      }
+
+      .bottom-right {
+        grid-row: 2; /* Positions the number box at the second row */
+        grid-column: 2; /* Positions the number box at the second column */
+        align-self: end; /* Aligns the content to the bottom of the grid area */
+        margin-top: -10px;
+        padding-right: 100px;
+        height: 100%;
+      }
+      .highlight-text {
+    background-color: black; /* Color of the highlight */
+    color: white; /* Text color */
+    padding: 2px 8px; /* Adds some space around the text within the highlight */
+}
+
+      .number-box p {
+        color: #ffffff;
+
+font-family: ABC Monument Grotesk Mono Unlicensed Trial;
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+
+line-height: 1;
+      }
+
+      .subtitle {
+        color: #000;
+
+        font-family: ABC Monument Grotesk Unlicensed Trial;
+        font-size: 28px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 0;
+        margin-top: 10px; /* Adjust the margin as needed to control the space between h1 and subtitle */
+      }
+      .bottom-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end; /* Aligns children (number box and icon) to the right */
+      }
+
+      .info-icon {
+  position: absolute; /* Position the icon absolutely */
+  top: 40px; /* Adjust the top margin as needed */
+  left: 40px; /* Adjust the left margin as needed */
+  transition: filter 0.3s ease; /* Optional: Adds smooth transition effect */
+}
+      .info-icon img {
+        width: 40px; /* Set the width of the icon */
+        height: 40px; /* Set the height of the icon */
+        transition: filter 0.3s ease; /* Optional: Adds smooth transition effect */
+      }
+
+      .info-icon:hover img {
+        filter: invert(100%); /* Inverts the colors of the icon on hover */
+      }
+      .text-link {
+    color: white; /* Keeps the text color consistent */
+    text-decoration: none; /* Removes the default underline from the link */
+}
+
+.text-link:hover {
+    text-decoration: underline; /* Adds an underline when the link is hovered over */
+}
+
+.highlight-text {
+    background-color: black; /* Color of the highlight */
+    padding: 2px 4px; /* Adds some space around the text within the highlight */
+}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="main-content">
+        <div class="text-box">
+          <h1>
+            ALL WATCHED OVER<br />
+            BY MACHINES OF LOVING GRACE
+          </h1>
+          <p class="subtitle">Synthesizers inspired by Cybernetics</p>
+        </div>
+      </div>
+      <div class="bottom-right">
+        <div class="number-box">
+            <p><a href="flowfield.html" class="text-link highlight-text">[01] FLOCKING SYSTEM ↗</a></p>
+            <p><a href="cellular.html" class="text-link highlight-text">[02] CELLULAR AUTOMATA ↗</a></p>
+        </div>
+        <a href="info.html" class="info-icon">
+          <img src="assets/info.svg" alt="Info" />
+        </a>
+      </div>
+    </div>
+  </body>
+</html>
